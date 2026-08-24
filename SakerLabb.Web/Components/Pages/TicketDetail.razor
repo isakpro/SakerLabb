@@ -21,7 +21,7 @@ else
         <dt>Skapat</dt><dd>@Ticket.Created</dd>
     </dl>
 
-    <div class="ticket-body">@((MarkupString)Ticket.Body)</div>
+    <div class="ticket-body">@Ticket.Body</div>
 
     <h2>Kommentarer</h2>
 
@@ -29,7 +29,7 @@ else
     {
         <div class="comment">
             <div class="comment-head">@comment.Author &middot; @comment.Created</div>
-            <div class="comment-text">@((MarkupString)comment.Text)</div>
+            <div class="comment-text">@comment.Text</div>
         </div>
     }
 

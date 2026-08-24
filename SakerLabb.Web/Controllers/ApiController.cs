@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Mvc;
 using SakerLabb.Web.Data;
 using SakerLabb.Web.Services;
@@ -68,7 +69,7 @@ public class ApiController : ControllerBase
     public async Task Echo(string q = "")
     {
         Response.ContentType = "text/html; charset=utf-8";
-        await Response.WriteAsync("<html><body><h2>Du sökte på: " + q + "</h2>"
+        await Response.WriteAsync("<html><body><h2>Du sökte på: " + HtmlEncoder.Default.Encode(q) + "</h2>"
             + "<p><a href=\"/tickets\">Tillbaka till ärendelistan</a></p></body></html>");
     }
 
