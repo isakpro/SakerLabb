@@ -34,8 +34,13 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 
 app.Use(async (context, next) =>
 {
-    context.Response.Headers["X-Powered-By"] = "SakerLabb 1.4.2 (ASP.NET Core 10.0)";
-    context.Response.Headers["X-Backend-Node"] = Environment.MachineName;
+    var headers = context.Response.Headers;
+    headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; "
+        + "img-src 'self' data:; connect-src 'self'; font-src 'self'; "
+        + "form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'";
+    headers["X-Frame-Options"] = "DENY";
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["Referrer-Policy"] = "no-referrer";
     await next();
 });
 
