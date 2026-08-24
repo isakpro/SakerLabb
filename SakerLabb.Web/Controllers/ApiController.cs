@@ -55,7 +55,13 @@ public class ApiController : ControllerBase
     [HttpGet("users/{id}")]
     public IActionResult UserById(string id)
     {
-        return Ok(_users.GetById(id));
+        var user = _users.GetById(id);
+        if (user is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(user);
     }
 
     [HttpGet("echo")]
@@ -114,15 +120,12 @@ public class ApiController : ControllerBase
     [HttpGet("report")]
     public IActionResult Report(string ticketId)
     {
-        try
+        var ticket = _tickets.GetById(ticketId);
+        if (ticket is null)
         {
-            var ticket = _tickets.GetById(ticketId);
-            return Ok(new { ticket!.Id, ticket.Title, ticket.Status });
+            return NotFound();
         }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "Rapporten kunde inte byggas för {TicketId}", ticketId);
-            return StatusCode(500, exception.ToString());
-        }
+
+        return Ok(new { ticket.Id, ticket.Title, ticket.Status });
     }
 }
