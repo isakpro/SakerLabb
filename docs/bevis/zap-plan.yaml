@@ -1,0 +1,108 @@
+env:
+  contexts:
+    - name: SakerLabb
+      urls:
+        - "http://localhost:5080"
+      includePaths:
+        - "http://localhost:5080.*"
+      excludePaths:
+        - "http://localhost:5080/diagnostik/ping.*"
+        - "http://localhost:5080/api/diag.*"
+        - "http://localhost:5080/api/preview.*"
+        - "http://localhost:5080/import/fetch.*"
+        - "http://localhost:5080/account/logout.*"
+        - "http://localhost:5080/account/delete.*"
+        - "http://localhost:5080/lib/.*"
+  parameters:
+    failOnError: false
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  - type: requestor
+    name: "seed-urls"
+    parameters:
+      user: ""
+    requests:
+      - url: "http://localhost:5080/"
+        method: GET
+      - url: "http://localhost:5080/login"
+        method: GET
+      - url: "http://localhost:5080/login?error=1&username=testare"
+        method: GET
+      - url: "http://localhost:5080/reset"
+        method: GET
+      - url: "http://localhost:5080/tickets"
+        method: GET
+      - url: "http://localhost:5080/tickets?search=skrivare&sort=t.Id%20DESC"
+        method: GET
+      - url: "http://localhost:5080/tickets/1"
+        method: GET
+      - url: "http://localhost:5080/tickets/2"
+        method: GET
+      - url: "http://localhost:5080/profile"
+        method: GET
+      - url: "http://localhost:5080/admin"
+        method: GET
+      - url: "http://localhost:5080/import"
+        method: GET
+      - url: "http://localhost:5080/diagnostics"
+        method: GET
+      - url: "http://localhost:5080/files/"
+        method: GET
+      - url: "http://localhost:5080/api/tickets?search=vpn&sort=t.Id%20DESC"
+        method: GET
+      - url: "http://localhost:5080/api/tickets/1"
+        method: GET
+      - url: "http://localhost:5080/api/users"
+        method: GET
+      - url: "http://localhost:5080/api/users/1"
+        method: GET
+      - url: "http://localhost:5080/api/echo?q=hej"
+        method: GET
+      - url: "http://localhost:5080/api/attachment?name=kundavtal-1042.txt"
+        method: GET
+      - url: "http://localhost:5080/api/config"
+        method: GET
+      - url: "http://localhost:5080/api/report?ticketId=1"
+        method: GET
+
+  - type: spider
+    name: "spider"
+    parameters:
+      context: SakerLabb
+      maxDuration: 3
+      maxDepth: 8
+
+  - type: passiveScan-wait
+    name: "passive-wait"
+    parameters:
+      maxDuration: 5
+
+  - type: activeScan
+    name: "active"
+    parameters:
+      context: SakerLabb
+      maxScanDurationInMins: 12
+      maxRuleDurationInMins: 2
+
+  - type: passiveScan-wait
+    name: "passive-wait-2"
+    parameters:
+      maxDuration: 5
+
+  - type: report
+    name: "html-report"
+    parameters:
+      template: traditional-html
+      reportDir: "C:/Users/isakr/Repos/SakerLabb/docs/bevis"
+      reportFile: "zap-fore"
+      reportTitle: "ZAP-rapport SakerLabb Support - fore atgarder"
+
+  - type: report
+    name: "json-report"
+    parameters:
+      template: traditional-json
+      reportDir: "C:/Users/isakr/Repos/SakerLabb/docs/bevis"
+      reportFile: "zap-fore"
+      reportTitle: "ZAP-rapport SakerLabb Support - fore atgarder"

@@ -1,11 +1,16 @@
-using System.Diagnostics;
+using System.Net.NetworkInformation;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Newtonsoft.Json;
 
 namespace SakerLabb.Web.Services;
 
-public class ImportService
+public partial class ImportService
 {
+    private const int PingCount = 2;
+    private const int PingTimeoutMs = 2000;
+
     private readonly ILogger<ImportService> _logger;
     private readonly HttpClient _http;
 
@@ -49,21 +54,35 @@ public class ImportService
 
     public string Ping(string host)
     {
-        var process = new Process
+        if (string.IsNullOrWhiteSpace(host) || host.Length > 253 || !HostPattern().IsMatch(host))
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = "/c ping -n 2 " + host,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
+            return "Ogiltigt värdnamn. Ange ett värdnamn eller en IP-adress.";
+        }
 
-        process.Start();
-        var output = process.StandardOutput.ReadToEnd();
-        process.WaitForExit(5000);
-        return output;
+        var output = new StringBuilder();
+        output.AppendLine("Pingar " + host + ":");
+
+        using var ping = new System.Net.NetworkInformation.Ping();
+
+        for (var attempt = 1; attempt <= PingCount; attempt++)
+        {
+            try
+            {
+                var reply = ping.Send(host, PingTimeoutMs);
+                output.AppendLine(reply.Status == IPStatus.Success
+                    ? "Svar från " + reply.Address + ": tid=" + reply.RoundtripTime + " ms"
+                    : "Inget svar: " + reply.Status);
+            }
+            catch (PingException)
+            {
+                output.AppendLine("Värden kunde inte nås.");
+                break;
+            }
+        }
+
+        return output.ToString();
     }
+
+    [GeneratedRegex(@"^[a-zA-Z0-9]([a-zA-Z0-9\-\.:]{0,251}[a-zA-Z0-9])?$")]
+    private static partial Regex HostPattern();
 }
